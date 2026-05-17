@@ -43,7 +43,8 @@ except Exception as e:
     logging.error(f"Failed to start StreamBot: {e}", exc_info=True)
     raise
 
-loop = asyncio.get_event_loop()
+loop = asyncio.new_event_loop()
+asyncio.set_event_loop(loop)
 
 async def start_services():
     try:
