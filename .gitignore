@@ -1,0 +1,62 @@
+# Python cache and bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+env/
+venv/
+.venv/
+
+# Environment variables and secrets
+.env
+.env.*
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Build / distribution
+dist/
+build/
+*.egg-info/
+pip-wheel-metadata/
+
+# Testing
+.pytest_cache/
+.tox/
+.nox/
+coverage.xml
+.coverage
+htmlcov/
+
+# Packaging
+.eggs/
+*.egg
+
+# Caches
+.cache/
+.mypy_cache/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+logs/
+*.log
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Misc
+*.bak
+*.pem
+*.key
+
+# Optional: local config / credentials (uncomment if you keep secrets locally)
+# config.py
+# credentials/

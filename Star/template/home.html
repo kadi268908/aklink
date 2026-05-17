@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AKIMAX</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
+    :root{--primary-blue:#4a6fff;--accent-red:#ff4757;--accent-cyan:#00d9ff;--dark-bg:#0a0f1f;--darker-bg:#151d3d;--card-bg:rgba(10,15,35,.85);--text-light:#f0f5ff;--text-muted:#a0adde;--glass-white:rgba(255,255,255,.08);--glass-border:rgba(255,255,255,.1);--transition:all .3s ease}
+    body{min-height:100vh;background:linear-gradient(135deg,var(--dark-bg) 0%,var(--darker-bg) 100%);color:var(--text-light);overflow-x:hidden;padding:0;position:relative}
+    .brand-link{display:inline-flex;text-decoration:none;color:inherit}
+    .brand-link:focus-visible{outline:3px solid rgba(0,217,255,.65);outline-offset:4px;border-radius:14px}
+    .bg-glow{position:fixed;width:100%;height:100%;z-index:-1;overflow:hidden}
+    .glow-circle{position:absolute;border-radius:50%;filter:blur(40px);opacity:.08}
+    .glow-1{width:200px;height:200px;background:var(--primary-blue);top:15%;left:10%;animation:float 12s infinite alternate ease-in-out}
+    .glow-2{width:180px;height:180px;background:var(--accent-red);bottom:20%;right:15%;animation:float 15s infinite alternate-reverse ease-in-out}
+    .glow-3{width:150px;height:150px;background:var(--accent-cyan);top:65%;left:85%;animation:float 10s infinite alternate ease-in-out}
+    @keyframes float{0%{transform:translate(0,0) scale(1)}100%{transform:translate(20px,-25px) scale(1.05)}}
+    header{position:fixed;top:20px;left:50%;transform:translateX(-50%);width:92%;max-width:800px;display:flex;justify-content:space-between;align-items:center;padding:12px 28px;z-index:1000;border-radius:16px;background:rgba(10,15,35,.75);backdrop-filter:blur(15px) saturate(180%);border:1px solid var(--glass-border);box-shadow:0 8px 32px rgba(0,0,0,.4),0 2px 8px rgba(74,111,255,.1);transition:var(--transition);animation:floatHeader 3s infinite ease-in-out}
+    @keyframes floatHeader{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-3px)}}
+    header:hover{box-shadow:0 12px 40px rgba(0,0,0,.5),0 0 0 1px rgba(74,111,255,.2),0 0 20px rgba(74,111,255,.1);transform:translateX(-50%) translateY(-5px)}
+    .logo-container{display:flex;align-items:center;gap:10px}
+    .logo-icon{font-size:1.3rem;color:var(--accent-cyan)}
+    .logo{font-size:1.4rem;font-weight:700;color:var(--text-light);letter-spacing:.5px}
+    .nav-buttons{display:flex;gap:12px}
+    .support-btn{display:inline-flex;align-items:center;gap:8px;padding:9px 20px;font-size:.9rem;font-weight:600;color:var(--text-light);background:rgba(255,71,87,.12);border-radius:10px;text-decoration:none;border:1px solid rgba(255,71,87,.25);transition:var(--transition);cursor:pointer}
+    .support-btn:hover{background:rgba(255,71,87,.25);transform:translateY(-2px);box-shadow:0 5px 15px rgba(255,71,87,.25)}
+    .main{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:120px 20px 130px}
+    .card{padding:38px 28px;border-radius:20px;text-align:center;width:92%;max-width:460px;background:var(--card-bg);backdrop-filter:blur(12px);border:1px solid var(--glass-border);box-shadow:0 12px 32px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.05);transition:var(--transition);animation:cardAppear .6s ease-out}
+    @keyframes cardAppear{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    .card:hover{box-shadow:0 16px 40px rgba(0,0,0,.45),0 0 0 1px rgba(74,111,255,.15)}
+    h1{font-size:1.8rem;color:var(--text-light);margin-bottom:8px;font-weight:700;line-height:1.3}
+    .subtitle{font-size:.95rem;color:var(--text-muted);margin-bottom:32px;font-weight:400;line-height:1.5;padding:0 10px}
+    .button-group{display:flex;flex-direction:column;gap:15px;margin-bottom:30px}
+    .btn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:15px 20px;font-size:.95rem;font-weight:600;color:#000;background:linear-gradient(90deg,#fff,#f0f5ff);border-radius:12px;text-decoration:none;transition:var(--transition);box-shadow:0 6px 18px rgba(0,0,0,.2);border:none;cursor:pointer;position:relative;overflow:hidden;z-index:1}
+    .btn::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);transition:left .6s ease;z-index:-1}
+    .btn:hover::before{left:100%}
+    .btn i{font-size:1.1rem;transition:var(--transition)}
+    .btn-1:hover{background:linear-gradient(90deg,#4a6fff,#6b8bff);color:#fff;box-shadow:0 8px 25px rgba(74,111,255,.4);transform:translateY(-3px)}
+    .btn-2:hover{background:linear-gradient(90deg,#ff4757,#ff6b8b);color:#fff;box-shadow:0 8px 25px rgba(255,71,87,.4);transform:translateY(-3px)}
+    .btn-3:hover{background:linear-gradient(90deg,#00a6ff,#00ffc6);color:#fff;box-shadow:0 8px 25px rgba(0,217,255,.4);transform:translateY(-3px)}
+    .btn:hover i{transform:scale(1.1)}
+    .btn-label{font-weight:600;white-space:nowrap}
+    .dmca-note{margin-top:28px;padding:16px;border-radius:10px;background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.2);font-size:.85rem;color:var(--text-muted);text-align:center;font-weight:500;line-height:1.5;transition:var(--transition);display:flex;align-items:flex-start;gap:10px}
+    .dmca-note:hover{background:rgba(255,71,87,.12);transform:translateY(-2px)}
+    .dmca-note i{color:var(--accent-red);margin-top:2px;flex-shrink:0}
+    .dmca-text{text-align:left}
+    footer{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);width:92%;max-width:500px;padding:16px 24px;text-align:center;font-size:.82rem;color:var(--text-muted);border-radius:14px;z-index:999;background:rgba(10,15,35,.75);backdrop-filter:blur(15px) saturate(180%);border:1px solid var(--glass-border);box-shadow:0 8px 32px rgba(0,0,0,.4),0 2px 8px rgba(0,217,255,.1);transition:var(--transition);animation:floatFooter 3s infinite ease-in-out;animation-delay:.5s}
+    @keyframes floatFooter{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-3px)}}
+    footer:hover{box-shadow:0 12px 40px rgba(0,0,0,.5),0 0 0 1px rgba(0,217,255,.2),0 0 20px rgba(0,217,255,.1);transform:translateX(-50%) translateY(-5px)}
+    .footer-content{display:flex;justify-content:center;align-items:center;gap:8px}
+    .footer-content i{font-size:.8rem;color:var(--accent-cyan)}
+    #redirect-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.92);z-index:2000;display:none;flex-direction:column;justify-content:center;align-items:center;color:var(--text-light);font-size:1.4rem;font-weight:600;text-align:center;opacity:0;transition:opacity .4s ease;backdrop-filter:blur(8px)}
+    #redirect-overlay.show{display:flex;opacity:1}
+    #redirect-overlay .spinner{width:60px;height:60px;border:3px solid rgba(255,255,255,.1);border-top:3px solid var(--accent-cyan);border-radius:50%;margin-bottom:24px;animation:spin 1s linear infinite}
+    @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+    #countdown{color:var(--accent-cyan);font-size:1.8rem;font-weight:700;margin:0 5px}
+    @media (max-width:768px){header{padding:14px 22px;width:94%;max-width:700px}.logo{font-size:1.3rem}.support-btn{padding:8px 16px;font-size:.85rem}.main{padding:110px 18px 120px}.card{padding:32px 24px;width:94%}h1{font-size:1.6rem}.subtitle{font-size:.9rem;margin-bottom:28px}.btn{padding:14px 18px;font-size:.9rem}.btn-label{font-size:.9rem}footer{padding:14px 20px;font-size:.78rem;width:94%}}
+    @media (max-width:576px){header{padding:12px 18px;top:15px}.logo{font-size:1.2rem}.logo-icon{font-size:1.1rem}.support-btn span{display:none}.support-btn{padding:10px;width:42px;height:42px;border-radius:50%;justify-content:center}.support-btn i{margin:0;font-size:1rem}.main{padding:100px 15px 115px}.card{padding:28px 20px}h1{font-size:1.5rem}.subtitle{font-size:.85rem;padding:0}.button-group{gap:12px}.btn{padding:14px 16px;font-size:.88rem;flex-direction:row;gap:10px}.btn i{font-size:1rem}.btn-label{font-size:.88rem}.dmca-note{padding:14px;font-size:.8rem;flex-direction:row;gap:8px}footer{padding:12px 18px;font-size:.75rem;bottom:15px}}
+    @media (max-width:400px){header{padding:10px 16px;width:96%}.logo{font-size:1.1rem}.logo-icon{font-size:1rem}.support-btn{width:40px;height:40px}.card{padding:24px 18px}h1{font-size:1.4rem}.subtitle{font-size:.82rem;margin-bottom:24px}.btn{padding:12px 14px;font-size:.85rem;gap:8px}.btn i{font-size:.95rem}.btn-label{font-size:.85rem}.dmca-note{padding:12px;font-size:.78rem}footer{padding:10px 16px;font-size:.72rem}}
+    @media (max-width:320px){.btn{flex-direction:column;gap:6px;padding:12px}.btn-label{font-size:.82rem}}
+  </style>
+</head>
+<body>
+  <div class="bg-glow">
+    <div class="glow-circle glow-1"></div>
+    <div class="glow-circle glow-2"></div>
+    <div class="glow-circle glow-3"></div>
+  </div>
+  <header>
+    <a href="https://akimax.site/" class="brand-link" aria-label="AKIMAX Home">
+      <div class="logo-container">
+        <div class="logo-icon"><i class="fas fa-rocket"></i></div>
+        <div class="logo">AKIMAX</div>
+      </div>
+    </a>
+    <div class="nav-buttons">
+      <a href="https://t.me/ImaxSupport1Bot" class="support-btn" id="support-nav-btn" rel="noopener noreferrer">
+        <i class="fas fa-headset"></i>
+        <span>SUPPORT</span>
+      </a>
+    </div>
+  </header>
+  <div class="main">
+    <div class="card" id="cardContent">
+      <h1>Welcome to AKIMAX</h1>
+      <p class="subtitle">Your gateway to premium content and exclusive community features</p>
+      <div class="button-group">
+        <a href="https://t.me/akimax_5" class="btn btn-1" id="btn-1" rel="noopener noreferrer">
+          <i class="fas fa-bolt"></i>
+          <span class="btn-label">AK IMAX 2.0</span>
+        </a>
+        <a href="https://t.me/AKImaxPremium_1" class="btn btn-2" id="btn-2" rel="noopener noreferrer">
+          <i class="fas fa-crown"></i>
+          <span class="btn-label">BUY PREMIUM</span>
+        </a>
+        <a href="https://t.me/AKiMAXMOViES00" class="btn btn-3" id="btn-3" rel="noopener noreferrer">
+          <i class="fas fa-broadcast-tower"></i>
+          <span class="btn-label">MAIN CHANNEL</span>
+        </a>
+      </div>
+      <div class="dmca-note" id="dmcaNote">
+        <i class="fas fa-exclamation-circle"></i>
+        <div class="dmca-text">DMCA: All content is sourced from public channels. Akimax does not host or distribute copyrighted material.</div>
+      </div>
+    </div>
+  </div>
+  <footer>
+    <div class="footer-content">
+      <i class="far fa-copyright"></i>
+      <span>2019-2026 TEAM AKIMAX • All Rights Reserved</span>
+    </div>
+  </footer>
+  <div id="redirect-overlay">
+    <div class="spinner"></div>
+    <p>Redirecting in <span id="countdown">3</span> seconds</p>
+  </div>
+  <script>
+    const buttons=document.querySelectorAll('.btn, #support-nav-btn');
+    const redirectOverlay=document.getElementById('redirect-overlay');
+    const countdownElement=document.getElementById('countdown');
+    let redirecting=false;
+    const handleRedirect=(e)=>{
+      e.preventDefault();
+      if(redirecting) return;
+      const targetUrl=e.currentTarget.href;
+      redirecting=true;
+      redirectOverlay.classList.add('show');
+      let count=3;
+      countdownElement.textContent=count;
+      const interval=setInterval(()=>{
+        count--;
+        countdownElement.textContent=count;
+        if(count===0){
+          clearInterval(interval);
+          window.open(targetUrl,'_blank');
+          setTimeout(()=>{
+            redirectOverlay.classList.remove('show');
+            redirecting=false;
+          },500);
+        }
+      },1000);
+    };
+    buttons.forEach((button)=>{
+      button.removeAttribute('target');
+      button.addEventListener('click',handleRedirect);
+    });
+    function adjustButtonText(){
+      const buttons=document.querySelectorAll('.btn');
+      const screenWidth=window.innerWidth;
+      buttons.forEach((btn)=>{
+        const label=btn.querySelector('.btn-label');
+        if(screenWidth<=400){
+          if(label.textContent==='AK IMAX 2.0') label.textContent='IMAX 2.0';
+          else if(label.textContent==='BUY PREMIUM') label.textContent='PREMIUM';
+          else if(label.textContent==='MAIN CHANNEL') label.textContent='CHANNEL';
+        }else if(screenWidth<=576){
+          if(label.textContent==='IMAX 2.0') label.textContent='AK IMAX 2.0';
+          else if(label.textContent==='PREMIUM') label.textContent='BUY PREMIUM';
+          else if(label.textContent==='CHANNEL') label.textContent='MAIN CHANNEL';
+        }
+      });
+    }
+    window.addEventListener('load',adjustButtonText);
+    window.addEventListener('resize',adjustButtonText);
+  </script>
+</body>
+</html>

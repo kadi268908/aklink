@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en" data-target-url="">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Service Timeout | Connection Issue</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
+    :root{
+      --blue:#4a6fff;          /* from AKIMAX: --primary-blue */
+      --red:#ff4757;           /* from AKIMAX: --accent-red */
+      --cyan:#00d9ff;          /* from AKIMAX: --accent-cyan */
+
+      --bg1:#0a0f1f;           /* from AKIMAX: --dark-bg */
+      --bg2:#151d3d;           /* from AKIMAX: --darker-bg */
+
+      --card:rgba(10,15,35,.92);
+      --text:#f0f5ff;
+      --muted:#a0adde;
+      --shadow:0 18px 55px rgba(0,0,0,.32);
+      --radius:16px;
+      --focus:rgba(0,217,255,.65);
+      --ease:cubic-bezier(.2,.8,.2,1);
+    }
+    body{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+
+      /* CHANGED: match AKIMAX gradient style */
+      background:linear-gradient(135deg,var(--bg1) 0%,var(--bg2) 100%);
+
+      color:var(--text);
+      overflow-x:hidden;
+      padding:10px;
+      position:relative;
+    }
+
+    /* CHANGED: match AKIMAX subtle glow feeling */
+    body::before{
+      content:'';
+      position:fixed;
+      inset:0;
+      background-image:
+        radial-gradient(circle at 10% 15%, rgba(74,111,255,1) 0%, transparent 60%),
+        radial-gradient(circle at 85% 80%, rgba(255,71,87,1) 0%, transparent 60%),
+        radial-gradient(circle at 85% 65%, rgba(0,217,255,1) 0%, transparent 60%);
+      filter: blur(40px);
+      opacity: .08;
+      z-index:1;
+      pointer-events:none;
+    }
+
+    .card{
+      width:min(420px,100%);
+      min-height:400px;
+      background:var(--card);
+      backdrop-filter:blur(16px);
+      -webkit-backdrop-filter:blur(16px);
+      border-radius:var(--radius);
+      padding:clamp(1.35rem,4.0vw,2.1rem) clamp(1.0rem,3.8vw,1.8rem);
+      text-align:center;
+      box-shadow:0 0 0 1px rgba(255,255,255,.07),var(--shadow);
+      border:1px solid rgba(255,255,255,.10);
+      z-index:10;
+      position:relative;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:.2rem;
+      animation:cardIn 680ms var(--ease);
+      transform:translateZ(0);
+    }
+    @keyframes cardIn{
+      from{opacity:0;transform:translateY(14px) scale(.992);filter:blur(2px)}
+      to{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
+    }
+    .anim{
+      opacity:0;
+      transform:translateY(10px);
+      animation:rise 820ms var(--ease) forwards;
+      animation-delay:var(--d,0ms);
+      will-change:transform,opacity;
+    }
+    @keyframes rise{to{opacity:1;transform:translateY(0)}}
+
+    .iconWrap{
+      margin:0 auto .95rem;
+      width:clamp(60px,9vw,76px);
+      height:clamp(60px,9vw,76px);
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .iconCircle{
+      position:absolute;
+      inset:0;
+      border-radius:50%;
+      background:linear-gradient(135deg,var(--red),#ff6b8b);
+      opacity:.93;
+      box-shadow:0 10px 26px rgba(255,71,87,.25);
+    }
+    .iconMark{
+      position:relative;
+      z-index:2;
+      color:#fff;
+      font-size:clamp(1.45rem,2.8vw,1.95rem);
+      font-weight:850;
+      line-height:1;
+    }
+
+    h1{
+      font-size:clamp(1.48rem,3.4vw,1.98rem);
+      margin-bottom:.48rem;
+      font-weight:760;
+      line-height:1.2;
+      background:linear-gradient(to right,#fff,#ffb8c0);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      background-clip:text;
+    }
+    .subtitle{
+      font-size:clamp(.93rem,2vw,1.0rem);
+      color:var(--muted);
+      line-height:1.55;
+      max-width:40ch;
+      margin:0 auto .85rem;
+      font-weight:420;
+    }
+
+    .status{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      margin:0 auto .85rem;
+      padding:.48rem .78rem;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.03);
+      color:rgba(240,245,255,.88);
+      font-size:.92rem;
+      max-width:fit-content;
+    }
+    .dot{
+      width:9px;height:9px;border-radius:50%;
+      background:var(--red);
+      box-shadow:0 0 0 6px rgba(255,71,87,.10);
+      animation:pulse 2.1s var(--ease) infinite;
+    }
+    @keyframes pulse{
+      0%,100%{opacity:1;transform:scale(1)}
+      50%{opacity:.35;transform:scale(.95)}
+    }
+
+    .timer{
+      width:min(330px,100%);
+      margin:.9rem auto 0;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:.55rem;
+    }
+    .bar{
+      width:100%;
+      height:10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.08);
+      overflow:hidden;
+      position:relative;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);
+    }
+    .barFill{
+      height:100%;
+      width:0%;
+      border-radius:999px;
+      background:linear-gradient(90deg,var(--red),#ff6b8b);
+      will-change:width;
+    }
+    .timeText{font-size:1.25rem;font-weight:680;letter-spacing:.2px}
+    .timeSub{font-size:.86rem;color:var(--muted);margin-top:-.25rem}
+
+    .btns{
+      width:min(520px,100%);
+      margin:1.1rem auto 0;
+      display:flex;
+      flex-direction:column;
+      gap:.72rem;
+      align-items:stretch;
+    }
+    .btn{
+      padding:.92rem 1.2rem;
+      border-radius:14px;
+      border:none;
+      cursor:pointer;
+      font-weight:650;
+      font-size:.97rem;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      width:100%;
+      height:50px;
+      transition:transform 220ms var(--ease),box-shadow 220ms var(--ease),background 220ms var(--ease),border-color 220ms var(--ease),opacity 180ms var(--ease);
+      will-change:transform;
+      transform:translateZ(0);
+      position:relative;
+      overflow:hidden;
+      user-select:none;
+      -webkit-tap-highlight-color:transparent;
+      min-width:0;
+    }
+    .btn:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+    .btn:disabled{opacity:.65;cursor:not-allowed;transform:none!important;box-shadow:none!important}
+    .red{background:linear-gradient(135deg,var(--red),#ff6b8b);color:#fff}
+    .blue{background:linear-gradient(135deg,var(--blue),#6b8bff);color:#fff}
+    .outline{
+      background:rgba(255,255,255,.02);
+      color:rgba(240,245,255,.92);
+      border:1.5px solid rgba(255,255,255,.15);
+      font-weight:600;
+    }
+    .red:hover,.blue:hover,.outline:hover{transform:translateY(-2px)}
+    .red:hover{box-shadow:0 10px 22px rgba(255,71,87,.25)}
+    .blue:hover{box-shadow:0 10px 22px rgba(74,111,255,.24)}
+    .outline:hover{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.26)}
+    .btn:active{transform:translateY(0) scale(.99)}
+
+    .ripple{
+      position:absolute;
+      border-radius:50%;
+      background:rgba(255,255,255,.28);
+      transform:scale(0);
+      animation:ripple 720ms var(--ease);
+      pointer-events:none;
+    }
+    @keyframes ripple{to{transform:scale(4);opacity:0}}
+
+    .overlay{
+      position:fixed;
+      inset:0;
+      z-index:9999;
+      opacity:0;
+      pointer-events:none;
+      transition:opacity 240ms var(--ease);
+      background:
+        radial-gradient(circle at 20% 25%, rgba(255,71,87,.16), transparent 55%),
+        radial-gradient(circle at 80% 70%, rgba(74,111,255,.14), transparent 55%),
+        linear-gradient(180deg, rgba(0,0,0,.965), rgba(0,0,0,.985));
+    }
+    .overlay.show{opacity:1;pointer-events:auto}
+    .overlayBox{
+      width:min(520px,92vw);
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%);
+      text-align:center;
+      padding:26px 18px;
+    }
+    .overlayTitle{
+      font-size:clamp(1.2rem,3.8vw,1.55rem);
+      font-weight:800;
+      color:#fff;
+      letter-spacing:.2px;
+      opacity:.98;
+    }
+    .overlaySub{
+      margin-top:10px;
+      color:rgba(255,255,255,.72);
+      font-size:clamp(.95rem,2.6vw,1.05rem);
+      line-height:1.45;
+    }
+    .overlayCount{
+      margin-top:14px;
+      font-size:clamp(2.6rem,7vw,3.4rem);
+      font-weight:900;
+      color:#fff;
+      letter-spacing:.5px;
+      animation:countPulse 900ms var(--ease) infinite;
+    }
+    @keyframes countPulse{
+      0%,100%{transform:scale(1);opacity:1}
+      50%{transform:scale(1.04);opacity:.92}
+    }
+    .overlayBar{
+      margin:18px auto 0;
+      width:min(360px,92%);
+      height:10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.08);
+      overflow:hidden;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);
+    }
+    .overlayFill{
+      height:100%;
+      width:0%;
+      border-radius:999px;
+      background:linear-gradient(90deg, rgba(255,71,87,.95), rgba(74,111,255,.95));
+      transition:width 140ms linear;
+      will-change:width;
+    }
+
+    .fallback{
+      position:fixed;
+      left:50%;
+      bottom:14px;
+      transform:translateX(-50%) translateY(20px);
+      width:min(520px,calc(100% - 20px));
+      background:rgba(10,15,35,.92);
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow:0 18px 55px rgba(0,0,0,.40);
+      border-radius:16px;
+      padding:12px;
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      opacity:0;
+      pointer-events:none;
+      transition:opacity 240ms var(--ease), transform 240ms var(--ease);
+      z-index:10000;
+      backdrop-filter:blur(16px);
+      -webkit-backdrop-filter:blur(16px);
+    }
+    .fallback.show{
+      opacity:1;
+      pointer-events:auto;
+      transform:translateX(-50%) translateY(0);
+    }
+    .fallbackText{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      text-align:left;
+      flex:1 1 220px;
+      min-width:0;
+    }
+    .fallbackTitle{
+      font-weight:750;
+      color:rgba(240,245,255,.96);
+      font-size:clamp(.92rem,2.4vw,.98rem);
+      line-height:1.25;
+      white-space:normal;
+      overflow-wrap:anywhere;
+    }
+    .fallbackSub{
+      color:rgba(160,173,222,.85);
+      font-size:clamp(.82rem,2.2vw,.88rem);
+      line-height:1.25;
+      white-space:normal;
+      overflow-wrap:anywhere;
+    }
+    .fallbackBtn{
+      height:44px;
+      border-radius:14px;
+      padding:0 14px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(255,255,255,.06);
+      color:#fff;
+      cursor:pointer;
+      font-weight:700;
+      font-size:.95rem;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      transition:transform 220ms var(--ease), background 220ms var(--ease), border-color 220ms var(--ease);
+      white-space:nowrap;
+      flex:0 0 auto;
+    }
+    .fallbackBtn:hover{transform:translateY(-2px);background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.28)}
+    .fallbackBtn:active{transform:translateY(0) scale(.99)}
+
+    @media (max-width: 720px){
+      .btn{height:52px}
+      .timer{width:min(310px,100%)}
+    }
+    @media (max-width: 420px){
+      body{padding:10px}
+      .card{width:100%;min-height:auto;padding:1.35rem 1.0rem;border-radius:14px}
+      .fallbackBtn{width:100%}
+    }
+    @media (prefers-reduced-motion: reduce){
+      *{animation:none!important;transition:none!important}
+      .anim{opacity:1!important;transform:none!important}
+      .overlayCount{animation:none!important}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="overlay" id="overlay" aria-hidden="true">
+    <div class="overlayBox">
+      <div class="overlayTitle" id="overlayTitle">Redirecting…</div>
+      <div class="overlaySub" id="overlaySub">Opening in</div>
+      <div class="overlayCount" id="overlayCount">3</div>
+      <div class="overlayBar" aria-hidden="true"><div class="overlayFill" id="overlayFill"></div></div>
+    </div>
+  </div>
+
+  <div class="fallback" id="fallback" aria-live="polite">
+    <div class="fallbackText">
+      <div class="fallbackTitle" id="fallbackTitle">Redirect didn’t work?</div>
+      <div class="fallbackSub" id="fallbackSub">Click Open now to continue.</div>
+    </div>
+    <button class="fallbackBtn" id="fallbackBtn" type="button">
+      <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+      <span id="fallbackBtnText">Open now</span>
+    </button>
+  </div>
+
+  <main class="card" role="main" aria-labelledby="title">
+    <div class="iconWrap anim" style="--d:60ms" aria-hidden="true">
+      <div class="iconCircle"></div>
+      <div class="iconMark">!</div>
+    </div>
+
+    <h1 class="anim" style="--d:130ms" id="title">Service Timeout</h1>
+    <p class="subtitle anim" style="--d:190ms">It's not you, it's us. Sorry for the inconvenience.</p>
+
+    <div class="status anim" style="--d:250ms" aria-live="polite">
+      <span class="dot" aria-hidden="true"></span>
+      <span id="statusLabel">Reconnecting…</span>
+    </div>
+
+    <section class="timer anim" style="--d:310ms" aria-label="Auto-retry countdown">
+      <div class="bar" aria-hidden="true"><div class="barFill" id="barFill"></div></div>
+      <div class="timeText"><span id="seconds">30</span></div>
+      <div class="timeSub">seconds</div>
+    </section>
+
+    <div class="btns anim" style="--d:370ms">
+      <button type="button" class="btn red" id="retryBtn">
+        <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
+        <span>Try Again Now</span>
+      </button>
+
+      <button type="button" class="btn blue" id="statusBtn">
+        <i class="fa-solid fa-server" aria-hidden="true"></i>
+        <span>Service Status</span>
+      </button>
+
+      <button type="button" class="btn outline" id="supportBtn">
+        <i class="fa-brands fa-telegram" aria-hidden="true"></i>
+        <span>Contact Support</span>
+      </button>
+    </div>
+  </main>
+
+  <script>
+    const TOTAL_SECONDS=60;
+    const TARGET_URL=(document.documentElement.dataset.targetUrl||"").trim()||window.location.href;
+    const STATUS_URL="https://akimax.site/status";
+    const SUPPORT_URL="https://t.me/ImaxSupport1Bot";
+
+    const secondsEl=document.getElementById('seconds');
+    const barFill=document.getElementById('barFill');
+
+    const retryBtn=document.getElementById('retryBtn');
+    const statusBtn=document.getElementById('statusBtn');
+    const supportBtn=document.getElementById('supportBtn');
+    const statusLabel=document.getElementById('statusLabel');
+
+    const overlay=document.getElementById('overlay');
+    const overlayTitle=document.getElementById('overlayTitle');
+    const overlaySub=document.getElementById('overlaySub');
+    const overlayCount=document.getElementById('overlayCount');
+    const overlayFill=document.getElementById('overlayFill');
+
+    const fallback=document.getElementById('fallback');
+    const fallbackTitle=document.getElementById('fallbackTitle');
+    const fallbackSub=document.getElementById('fallbackSub');
+    const fallbackBtn=document.getElementById('fallbackBtn');
+    const fallbackBtnText=document.getElementById('fallbackBtnText');
+
+    let endAt=performance.now()+TOTAL_SECONDS*1000;
+    let rafId=0;
+    let pausedAt=0;
+    let paused=false;
+
+    let busy=false;
+    let retryLoading=false;
+    let saved=null;
+
+    let fallbackUrl="";
+    let fallbackLabel="";
+    let fallbackTimer=0;
+
+    function clamp(n,a,b){return Math.max(a,Math.min(b,n))}
+    function delay(ms){return new Promise(r=>setTimeout(r,ms))}
+
+    function remainingMs(){return Math.max(0,endAt-performance.now())}
+
+    function renderTimer(){
+      const ms=remainingMs();
+      const secs=Math.ceil(ms/1000);
+      secondsEl.textContent=String(secs);
+      const pct=clamp((1-ms/(TOTAL_SECONDS*1000))*100,0,100);
+      barFill.style.width=pct.toFixed(2)+"%";
+      if(ms<=0){stopTimer();hardReload();return}
+      rafId=requestAnimationFrame(renderTimer);
+    }
+
+    function startTimer(){stopTimer();rafId=requestAnimationFrame(renderTimer)}
+    function stopTimer(){if(rafId) cancelAnimationFrame(rafId);rafId=0}
+
+    function pauseTimer(){
+      if(paused) return;
+      paused=true;
+      pausedAt=performance.now();
+      stopTimer();
+    }
+
+    function resumeTimer(){
+      if(!paused) return;
+      paused=false;
+      const dt=performance.now()-pausedAt;
+      endAt+=dt;
+      startTimer();
+    }
+
+    function hardReload(){
+      const url=new URL(TARGET_URL,window.location.href);
+      url.searchParams.set('_ts',String(Date.now()));
+      window.location.replace(url.toString());
+    }
+
+    async function ping(url,timeoutMs=5000){
+      const controller=new AbortController();
+      const t=setTimeout(()=>controller.abort(),timeoutMs);
+      try{
+        const res=await fetch(url,{method:'HEAD',cache:'no-store',signal:controller.signal});
+        return res.ok;
+      }catch{
+        return false;
+      }finally{
+        clearTimeout(t);
+      }
+    }
+
+    function setRetryLoading(on){
+      retryLoading=on;
+      retryBtn.disabled=on;
+      retryBtn.innerHTML=on
+        ?'<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i><span>Connecting...</span>'
+        :'<i class="fa-solid fa-rotate-right" aria-hidden="true"></i><span>Try Again Now</span>';
+    }
+
+    async function retryConnection(){
+      if(busy) return;
+      setRetryLoading(true);
+      statusLabel.textContent="Reconnecting…";
+      endAt=performance.now()+TOTAL_SECONDS*1000;
+      barFill.style.width="0%";
+      const ok=await ping(TARGET_URL,5000);
+      if(ok){statusLabel.textContent="Back online. Reloading…";hardReload();return}
+      statusLabel.textContent="Still unavailable. Retrying…";
+      setRetryLoading(false);
+      startTimer();
+    }
+
+    function createRipple(event){
+      const el=event.currentTarget;
+      const circle=document.createElement("span");
+      const d=Math.max(el.clientWidth,el.clientHeight);
+      const r=d/2;
+      const rect=el.getBoundingClientRect();
+      circle.style.width=circle.style.height=`${d}px`;
+      circle.style.left=`${event.clientX-rect.left-r}px`;
+      circle.style.top=`${event.clientY-rect.top-r}px`;
+      circle.classList.add("ripple");
+      const existing=el.getElementsByClassName("ripple")[0];
+      if(existing) existing.remove();
+      el.appendChild(circle);
+    }
+
+    function hideFallback(){
+      fallback.classList.remove('show');
+      fallbackUrl="";
+      fallbackLabel="";
+      if(fallbackTimer) clearTimeout(fallbackTimer);
+      fallbackTimer=0;
+    }
+
+    function showFallback(url,label){
+      fallbackUrl=url;
+      fallbackLabel=label;
+      fallbackTitle.textContent="Redirect didn’t work?";
+      fallbackSub.textContent=`Click Open now to open ${label}.`;
+      fallbackBtnText.textContent="Open now";
+      fallback.classList.add('show');
+      if(fallbackTimer) clearTimeout(fallbackTimer);
+      fallbackTimer=setTimeout(()=>hideFallback(),12000);
+    }
+
+    function showOverlay(titleText){
+      overlayTitle.textContent=titleText;
+      overlaySub.textContent="Opening in";
+      overlayCount.textContent="3";
+      overlayFill.style.width="0%";
+      overlay.classList.add('show');
+      overlay.setAttribute('aria-hidden','false');
+    }
+
+    function hideOverlay(){
+      overlay.classList.remove('show');
+      overlay.setAttribute('aria-hidden','true');
+    }
+
+    function enterBusy(){
+      if(busy) return false;
+      busy=true;
+      saved={
+        retryDisabled:retryBtn.disabled,
+        statusDisabled:statusBtn.disabled,
+        supportDisabled:supportBtn.disabled,
+        retryHTML:retryBtn.innerHTML
+      };
+      retryBtn.disabled=true;
+      statusBtn.disabled=true;
+      supportBtn.disabled=true;
+      pauseTimer();
+      return true;
+    }
+
+    function exitBusy(){
+      busy=false;
+      hideOverlay();
+      if(saved){
+        retryBtn.disabled=saved.retryDisabled;
+        statusBtn.disabled=saved.statusDisabled;
+        supportBtn.disabled=saved.supportDisabled;
+        retryBtn.innerHTML=saved.retryHTML;
+      }
+      saved=null;
+      if(!retryLoading) resumeTimer();
+    }
+
+    async function redirectFlow(url,label,titleText){
+      hideFallback();
+      if(busy||retryLoading) return;
+      if(!enterBusy()) return;
+      showOverlay(titleText);
+
+      const total=3;
+      for(let i=total;i>=1;i--){
+        overlayCount.textContent=String(i);
+        overlayFill.style.width=String(((total-i)/total)*100)+"%";
+        await delay(1000);
+      }
+      overlayFill.style.width="100%";
+      await delay(120);
+
+      let win=null;
+      try{win=window.open(url,'_blank','noopener,noreferrer')}catch{}
+
+      try{if(win) win.focus()}catch{}
+
+      exitBusy();
+
+      if(!win){
+        showFallback(url,label);
+      }
+    }
+
+    function init(){
+      secondsEl.textContent=String(TOTAL_SECONDS);
+      barFill.style.width="0%";
+
+      [retryBtn,statusBtn,supportBtn].forEach(b=>b.addEventListener('click',createRipple));
+
+      retryBtn.addEventListener('click',retryConnection);
+      statusBtn.addEventListener('click',()=>redirectFlow(STATUS_URL,"Service Status","Redirecting to Service Status…"));
+      supportBtn.addEventListener('click',()=>redirectFlow(SUPPORT_URL,"Support","Redirecting to Support…"));
+
+      fallbackBtn.addEventListener('click',()=>{
+        if(!fallbackUrl) return;
+        const w=window.open(fallbackUrl,'_blank','noopener,noreferrer');
+        try{if(w) w.focus()}catch{}
+        hideFallback();
+      });
+
+      document.addEventListener('visibilitychange',()=>{
+        if(document.hidden) pauseTimer();
+        else if(!busy) resumeTimer();
+      });
+
+      startTimer();
+    }
+
+    window.addEventListener('DOMContentLoaded',init);
+  </script>
+</body>
+</html>

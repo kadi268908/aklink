@@ -1,0 +1,29 @@
+# ============================================================================
+# Copyright (c) 2025 Star. All Rights Reserved.
+# 
+# PROPRIETARY AND CONFIDENTIAL
+# 
+# This file is part of AKImaxLink.
+# 
+# Unauthorized copying, distribution, modification, public display, or public 
+# performance of this file, via any medium, is strictly prohibited.
+# 
+# For licensing information, see the LICENSE file in the root directory.
+# ============================================================================
+
+
+https://github.com/KurimuzonAkuma/pyrogram/archive/v2.1.34.zip
+tgcrypto
+aiohttp
+python-dotenv<=0.20.0
+motor
+datetime
+pytz
+aiofiles
+dnspython
+apscheduler
+requests
+psutil
+pyromod
+colorama
+jinja2
