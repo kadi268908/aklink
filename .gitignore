@@ -58,5 +58,5 @@ logs/
 *.key
 
 # Optional: local config / credentials (uncomment if you keep secrets locally)
-# config.py
-# credentials/
+config.py
+credentials/
