@@ -37,17 +37,12 @@ logging.getLogger("aiohttp").setLevel(logging.ERROR)
 logging.getLogger("pyrogram").setLevel(logging.ERROR)
 logging.getLogger("aiohttp.web").setLevel(logging.ERROR)
 
-try:
-    StreamBot.start()
-except Exception as e:
-    logging.error(f"Failed to start StreamBot: {e}", exc_info=True)
-    raise
-
-loop = asyncio.new_event_loop()
-asyncio.set_event_loop(loop)
-
 async def start_services():
+    app = None
+    bot_started = False
     try:
+        await StreamBot.start()
+        bot_started = True
         bot_info = await StreamBot.get_me()
         StreamBot.username = bot_info.username
         await initialize_clients()
@@ -64,27 +59,33 @@ async def start_services():
     except Exception as e:
         logging.error(f"Error in start_services: {e}", exc_info=True)
         raise
+    finally:
+        try:
+            await db1.close()
+            logging.info("Database connection closed")
+        except Exception as e:
+            logging.error(f"Error closing database: {e}")
+
+        if app is not None:
+            try:
+                await app.cleanup()
+                logging.info("Web server stopped")
+            except Exception as e:
+                logging.error(f"Error stopping web server: {e}")
+
+        if bot_started:
+            try:
+                await StreamBot.stop()
+                logging.info("Bot stopped")
+            except Exception as e:
+                logging.error(f"Error stopping bot: {e}")
 
 if __name__ == '__main__':
     try:
-        loop.run_until_complete(start_services())
+        asyncio.run(start_services())
     except KeyboardInterrupt:
         logging.info('Received interrupt signal, shutting down gracefully...')
     except Exception as e:
         logging.error(f"Fatal error: {e}", exc_info=True)
     finally:
-        try:
-            # Close database connection
-            loop.run_until_complete(db1.close())
-            logging.info("Database connection closed")
-        except Exception as e:
-            logging.error(f"Error closing database: {e}")
-        
-        # Close bot
-        try:
-            loop.run_until_complete(StreamBot.stop())
-            logging.info("Bot stopped")
-        except Exception as e:
-            logging.error(f"Error stopping bot: {e}")
-        
         logging.info('----------------------- Service Stopped -----------------------')
