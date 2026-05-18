@@ -31,6 +31,7 @@ from datetime import date, datetime
 from Star.server import web_server
 from Star.database import db1
 from pyrogram import Client, __version__
+from Script import script
 
 # Ensure Pyrogram clients created at import-time bind to this loop.
 loop = asyncio.new_event_loop()
@@ -44,12 +45,34 @@ from Star.bot.plugins import stream as _stream_plugin
 
 def register_fallback_handlers():
     """Register critical handlers explicitly if decorator/plugin loading fails."""
+
+    async def fallback_private_handler(client, message):
+        text = message.text or ""
+        if text.startswith("/start"):
+            await message.reply_text(
+                text=script.START_TXT.format(user=message.from_user.first_name),
+                disable_web_page_preview=True,
+            )
+            return
+
+        if text.startswith("/"):
+            await message.reply_text(
+                "<b>Bot is online, but command handlers are not active yet.</b>",
+                disable_web_page_preview=True,
+            )
+            return
+
+        await message.reply_text(
+            "<b>Bot is online. Send me a file or use /start.</b>",
+            disable_web_page_preview=True,
+        )
+
     StreamBot.add_handler(
         MessageHandler(
-            _commands_plugin.start,
-            filters.command("start") & filters.private,
+            fallback_private_handler,
+            filters.private & filters.text,
         ),
-        group=0,
+        group=-100,
     )
     StreamBot.add_handler(
         MessageHandler(
