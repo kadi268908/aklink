@@ -23,7 +23,7 @@ StreamBot = Client(
     bot_token=Var.BOT_TOKEN,
     sleep_threshold=Var.SLEEP_THRESHOLD,
     workdir="Star",
-    plugins={"root": "Star.bot.plugins"},
+    plugins={"root": "Star/bot/plugins"},
     workers=5
 )
 
