@@ -31,6 +31,7 @@ routes = web.RouteTableDef()
 
 ERROR_PAGE_PATH = "Star/template/error.html"
 class_cache = {}
+IGNORED_PROBE_PATHS = {"robots.txt", "favicon.ico", "apple-touch-icon.png"}
 
 STATUS_PAGE_HTML = r"""
 <!DOCTYPE html>
@@ -224,6 +225,14 @@ setInterval(refresh,3000);
 async def root_route_handler(request):
     return web.FileResponse("Star/template/home.html")
 
+@routes.get("/robots.txt", allow_head=True)
+async def robots_handler(_):
+    return web.Response(text="User-agent: *\nDisallow: /\n", content_type="text/plain")
+
+@routes.get("/favicon.ico", allow_head=True)
+async def favicon_handler(_):
+    return web.Response(status=204)
+
 @routes.get("/status-json", allow_head=True)
 async def status_json(_):
     try:
@@ -267,8 +276,9 @@ async def watch_handler(request: web.Request):
         else:
             regex_match = re.search(r"(\d+)(?:\/\S+)?", path)
             if not regex_match:
-                logging.error(f"Invalid path format: {path}")
-                return web.FileResponse(ERROR_PAGE_PATH)
+                if path not in IGNORED_PROBE_PATHS:
+                    logging.info(f"Ignoring invalid watch path: {path}")
+                return web.Response(status=404, text="Not found")
             id = int(regex_match.group(1))
             secure_hash = request.rel_url.query.get("hash")
 
@@ -292,8 +302,9 @@ async def stream_handler(request: web.Request):
         else:
             regex_match = re.search(r"(\d+)(?:\/\S+)?", path)
             if not regex_match:
-                logging.error(f"Invalid path format: {path}")
-                return web.FileResponse(ERROR_PAGE_PATH)
+                if path not in IGNORED_PROBE_PATHS:
+                    logging.info(f"Ignoring invalid stream path: {path}")
+                return web.Response(status=404, text="Not found")
             id = int(regex_match.group(1))
             secure_hash = request.rel_url.query.get("hash")
 
