@@ -46,21 +46,36 @@ async def start_services():
     app = None
     bot_started = False
     try:
-        await StreamBot.start()
+        logging.info("Starting StreamBot client...")
+        await asyncio.wait_for(StreamBot.start(), timeout=120)
         bot_started = True
+        logging.info("StreamBot client started")
+
+        logging.info("Fetching bot profile...")
         bot_info = await StreamBot.get_me()
         StreamBot.username = bot_info.username
+
+        logging.info("Initializing extra clients...")
         await initialize_clients()
+
+        logging.info("Starting web server...")
         app = web.AppRunner(await web_server())
         await app.setup()
         bind_address = Var.BIND_ADRESS
         await web.TCPSite(app, bind_address, Var.PORT).start()
+        logging.info(f"Web server started on {bind_address}:{Var.PORT}")
         curr = datetime.now(timezone("Asia/Kolkata"))
         date = curr.strftime('%d %B, %Y')
         time = curr.strftime('%I:%M:%S %p')
-        await StreamBot.send_message(Var.LOG_CHANNEL, f"<b>{bot_info.mention} ɪs ʀᴇsᴛᴀʀᴛᴇᴅ !!\n\n<blockquote>⏰ ᴅᴀᴛᴇ : `{date}`\n📅 ᴛɪᴍᴇ : `{time}`\n🌐 ᴛɪᴍᴇᴢᴏɴᴇ : `Aisa/Kolkata`\n\n🉐 ᴘʏʀᴏɢʀᴀᴍ ᴠᴇʀsɪᴏɴ : `V{__version__}`\n📌 ᴘʏᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : `V3.13.1`</blockquote></b>")  
+        try:
+            await StreamBot.send_message(Var.LOG_CHANNEL, f"<b>{bot_info.mention} ɪs ʀᴇsᴛᴀʀᴛᴇᴅ !!\n\n<blockquote>⏰ ᴅᴀᴛᴇ : `{date}`\n📅 ᴛɪᴍᴇ : `{time}`\n🌐 ᴛɪᴍᴇᴢᴏɴᴇ : `Aisa/Kolkata`\n\n🉐 ᴘʏʀᴏɢʀᴀᴍ ᴠᴇʀsɪᴏɴ : `V{__version__}`\n📌 ᴘʏᴛʜᴏɴ ᴠᴇʀsɪᴏɴ : `V3.13.1`</blockquote></b>")
+        except Exception as notify_error:
+            logging.warning(f"Startup notification failed: {notify_error}")
         print(f"Vortex Stream Bot Started......⚡️⚡️⚡️")
         await idle()
+    except asyncio.TimeoutError:
+        logging.error("Timed out while starting StreamBot. Check Telegram connectivity and BOT_TOKEN.", exc_info=True)
+        raise
     except Exception as e:
         logging.error(f"Error in start_services: {e}", exc_info=True)
         raise
