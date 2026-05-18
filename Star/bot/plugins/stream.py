@@ -15,6 +15,7 @@ SRI_ID = int("7563149367")
 
 import os
 import asyncio
+import logging
 from config import Var
 from Script import script
 from Star.database import db1
