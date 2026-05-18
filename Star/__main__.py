@@ -24,12 +24,17 @@ from aiohttp import web
 from pathlib import Path
 from pytz import timezone
 from pyrogram import idle
-from Star.bot import StreamBot
 from pyrogram.raw.all import layer
 from datetime import date, datetime
 from Star.server import web_server
 from Star.database import db1
 from pyrogram import Client, __version__
+
+# Ensure Pyrogram clients created at import-time bind to this loop.
+loop = asyncio.new_event_loop()
+asyncio.set_event_loop(loop)
+
+from Star.bot import StreamBot
 from Star.bot.clients import initialize_clients
 
 logging.basicConfig(level=logging.INFO,format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -82,10 +87,11 @@ async def start_services():
 
 if __name__ == '__main__':
     try:
-        asyncio.run(start_services())
+        loop.run_until_complete(start_services())
     except KeyboardInterrupt:
         logging.info('Received interrupt signal, shutting down gracefully...')
     except Exception as e:
         logging.error(f"Fatal error: {e}", exc_info=True)
     finally:
+        loop.close()
         logging.info('----------------------- Service Stopped -----------------------')
