@@ -27,11 +27,18 @@ from pyrogram import idle
 from pyrogram import filters
 from pyrogram.raw.all import layer
 from pyrogram.handlers import MessageHandler
+from pyrogram.errors import FloodWait
 from datetime import date, datetime
 from Star.server import web_server
 from Star.database import db1
 from pyrogram import Client, __version__
 from Script import script
+
+# Configure logging FIRST, before any other operations
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+logging.getLogger("aiohttp").setLevel(logging.ERROR)
+logging.getLogger("pyrogram").setLevel(logging.ERROR)
+logging.getLogger("aiohttp.web").setLevel(logging.ERROR)
 
 # Ensure Pyrogram clients created at import-time bind to this loop.
 loop = asyncio.new_event_loop()
@@ -39,8 +46,19 @@ asyncio.set_event_loop(loop)
 
 from Star.bot import StreamBot
 from Star.bot.clients import initialize_clients
-from Star.bot.plugins import commands as _commands_plugin
-from Star.bot.plugins import stream as _stream_plugin
+
+# Import plugins with explicit error handling to ensure handlers are registered
+try:
+    from Star.bot.plugins import commands as _commands_plugin
+    logging.info("✓ Commands plugin loaded successfully")
+except Exception as e:
+    logging.error(f"Failed to load commands plugin: {e}", exc_info=True)
+
+try:
+    from Star.bot.plugins import stream as _stream_plugin
+    logging.info("✓ Stream plugin loaded successfully")
+except Exception as e:
+    logging.error(f"Failed to load stream plugin: {e}", exc_info=True)
 
 
 def register_fallback_handlers():
@@ -92,26 +110,42 @@ def register_fallback_handlers():
         group=-1,
     )
 
-logging.basicConfig(level=logging.INFO,format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-logging.getLogger("aiohttp").setLevel(logging.ERROR)
-logging.getLogger("pyrogram").setLevel(logging.ERROR)
-logging.getLogger("aiohttp.web").setLevel(logging.ERROR)
-
 async def start_services():
     app = None
     bot_started = False
     try:
         logging.info("Starting StreamBot client...")
-        await asyncio.wait_for(StreamBot.start(), timeout=120)
+        while True:
+            try:
+                await StreamBot.start()
+                break
+            except FloodWait as flood_error:
+                wait_seconds = int(getattr(flood_error, "value", 0) or getattr(flood_error, "x", 0) or 0)
+                wait_seconds = max(wait_seconds, 1)
+                logging.warning(f"Telegram asked to wait {wait_seconds}s before bot authorization; sleeping then retrying")
+                await asyncio.sleep(wait_seconds + 5)
         bot_started = True
         logging.info("StreamBot client started")
-        handler_count = sum(len(v) for v in StreamBot.dispatcher.groups.values())
+        
+        # Count handlers - try multiple methods to ensure accuracy
+        try:
+            handler_count = sum(len(v) for v in StreamBot.dispatcher.groups.values())
+        except (AttributeError, TypeError):
+            # Fallback: check if handlers were registered at all
+            handler_count = 0
+        
         logging.info(f"Registered handlers: {handler_count}")
+        logging.info(f"Dispatcher groups keys: {list(StreamBot.dispatcher.groups.keys()) if hasattr(StreamBot.dispatcher, 'groups') and StreamBot.dispatcher.groups else 'empty'}")
+        
         if handler_count == 0:
             logging.warning("No handlers registered from plugins; enabling fallback manual handlers")
             register_fallback_handlers()
-            handler_count = sum(len(v) for v in StreamBot.dispatcher.groups.values())
+            try:
+                handler_count = sum(len(v) for v in StreamBot.dispatcher.groups.values())
+            except (AttributeError, TypeError):
+                handler_count = 0
             logging.info(f"Registered handlers after fallback: {handler_count}")
+            logging.info(f"Dispatcher groups after fallback: {list(StreamBot.dispatcher.groups.keys()) if hasattr(StreamBot.dispatcher, 'groups') and StreamBot.dispatcher.groups else 'empty'}")
 
         logging.info("Fetching bot profile...")
         bot_info = await StreamBot.get_me()
