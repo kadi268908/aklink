@@ -36,6 +36,8 @@ asyncio.set_event_loop(loop)
 
 from Star.bot import StreamBot
 from Star.bot.clients import initialize_clients
+from Star.bot.plugins import commands as _commands_plugin
+from Star.bot.plugins import stream as _stream_plugin
 
 logging.basicConfig(level=logging.INFO,format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logging.getLogger("aiohttp").setLevel(logging.ERROR)
@@ -50,6 +52,8 @@ async def start_services():
         await asyncio.wait_for(StreamBot.start(), timeout=120)
         bot_started = True
         logging.info("StreamBot client started")
+        handler_count = sum(len(v) for v in StreamBot.dispatcher.groups.values())
+        logging.info(f"Registered handlers: {handler_count}")
 
         logging.info("Fetching bot profile...")
         bot_info = await StreamBot.get_me()
